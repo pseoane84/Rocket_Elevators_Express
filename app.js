@@ -110,7 +110,7 @@ app.get('/email-list', async (req, res) => {
     const emails = agents.map(agent => agent.email).join(',');
     res.send(emails);
   } catch (error) {
-    console.error('Error fetching agents:', error);
+    console.error('Error fetching agents:', error.message);
     res.status(500).send('Error fetching agent data.');
   }
 });
