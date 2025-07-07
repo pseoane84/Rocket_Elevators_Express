@@ -19,3 +19,12 @@ That makes it easier to learn, build, and maintain your app.
 3. Express makes server code simpler and more organized.
 Express gives you tools and shortcuts to handle common tasks like routes, data, and responses.
 Instead of writing long, complex code with Node.js alone, Express helps you write clean and readable code with fewer lines.
+
+
+How to Start and Stop the Server
+Open your terminal and navigate to the root folder of the project (where app.js is located):
+~/Codeboxx/Rocket_Elevators_Express$
+Then run the following: node app.js
+You should see:
+Server listening on port 3000
+To stop the server, go to the terminal where it’s running and press: ctrl + c

@@ -13,6 +13,7 @@
  * - req (request): Info sent by the client.
  * - res (response): Info sent back to the client.
  * - Endpoint: A route where the server listens (e.g., /agent).
+ * - Query parameter: Value passed in URL like ?region=North
  */
 
 /**
@@ -53,6 +54,7 @@ app.listen(port, () => {
 /**
  * GET /agent
  * Returns a placeholder list of agents
+ * http://localhost:3000/agent
  */
 app.get('/agent', (req, res) => {
   res.send('List of agents (simulated)');
@@ -61,6 +63,18 @@ app.get('/agent', (req, res) => {
 /**
  * POST /create
  * Receives new agent data and responds with confirmation
+ * http://localhost:3000/create
+ * In the Body section:
+ * Select raw
+ * Change the format to JSON
+ * Paste the following content:
+ * {
+ * "name": "Laura Sanchez",
+ * "email": "laura@example.com",
+ * "region": "West",
+ * "rating": 4.8,
+ * "fee": 300
+ * }
  */
 app.post('/create', (req, res) => {
   const newAgent = req.body;
@@ -72,7 +86,8 @@ app.post('/create', (req, res) => {
 
 /**
  * GET /hello
- * Returns "Hello World!"
+ * Returns "Hello World!" 
+ * http://localhost:3000/hello
  */
 app.get('/hello', (req, res) => {
   res.send('Hello World!');
@@ -80,7 +95,8 @@ app.get('/hello', (req, res) => {
 
 /**
  * GET /status
- * Returns a message with the current port
+ * Returns a message with the current port 
+ * http://localhost:3000/status
  */
 app.get('/status', (req, res) => {
   res.send(`Server is running on port ${port}`);
@@ -88,7 +104,8 @@ app.get('/status', (req, res) => {
 
 /**
  * GET /error
- * Simulates an error response
+ * Simulates an error response 
+ * http://localhost:3000/error
  */
 app.get('/error', (req, res) => {
   try {
@@ -100,7 +117,8 @@ app.get('/error', (req, res) => {
 
 /**
  * GET /email-list
- * Returns a comma-separated list of agent emails
+ * Returns a comma-separated list of agent emails 
+ * http://localhost:3000/email-list
  */
 app.get('/email-list', async (req, res) => {
   try {
@@ -119,7 +137,19 @@ app.get('/email-list', async (req, res) => {
 /**
  * POST /contact-us
  * Accepts a first_name, last_name, and message from user input
+ * Select POST
+ * URL: http://localhost:3000/contact-us
+ * In the Body section:
+ * Select raw
+ * Change the format to JSON
+ * Paste the following content:
+ * {
+ *   "first_name": "Pablo",
+ *   "last_name": "Seoane",
+ *   "message": "Estoy probando el POST"
+ * }
  */
+
 app.post('/contact-us', (req, res) => {
   const { first_name, last_name, message } = req.body;
 
@@ -136,6 +166,8 @@ app.post('/contact-us', (req, res) => {
 /**
  * GET /region-avg?region=North
  * Returns the average rating and fee for agents in a region
+ * http://localhost:3000/region-avg?region=North
+ * Requires a region parameter passed as a query
  */
 const detailedAgents = [
   { name: 'Alice', region: 'North', rating: 4.5, fee: 200 },
@@ -169,6 +201,8 @@ app.get('/region-avg', (req, res) => {
 /**
  * GET /calc-residential?apartments=80&floors=10
  * Calculates number of elevators and total cost
+ * http://localhost:3000/calc-residential?apartments=80&floors=10
+ * Required parameters: apartments, floors
  */
 app.get('/calc-residential', (req, res) => {
   const { apartments, floors } = req.query;
