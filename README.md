@@ -38,15 +38,16 @@ This combination allows for:
 
 ## Summary of Routes
 
-| Route             | Method | Purpose                             |
-|------------------|--------|-------------------------------------|
-| `/hello`         | GET    | Test connection                     |
-| `/status`        | GET    | Returns server status               |
-| `/error`         | GET    | Simulates a failed request          |
-| `/email-list`    | GET    | Returns agent email list            |
-| `/region-avg`    | GET    | Returns average by region           |
-| `/contact-us`    | POST   | Stores contact form data            |
-| `/calc-residential` | POST | Calculates residential quote        |
+| Route                | Method | Purpose                               |
+|----------------------|--------|---------------------------------------|
+| `/hello`             | GET    | Test connection                       |
+| `/status`            | GET    | Returns server status                 |
+| `/error`             | GET    | Simulates a failed request            |
+| `/email-list`        | GET    | Returns agent email list              |
+| `/region-avg`        | GET    | Returns average by region             |
+| `/calc-residential`  | GET    | Calculates residential elevator quote |
+| `/contact-us`        | POST   | Accepts contact form messages         |
+
 
 These routes simulate core business logic that will eventually connect to real databases and frontend systems.
 
@@ -77,7 +78,17 @@ With Express, we can:
 ---
 
 ## What is dotenv (for environment variables)
-dotenv is a Node.js package that loads environment variables from a .env file into process.env. It helps keep sensitive information like ports, database URLs, or API keys out of your source code. This is useful for maintaining clean code and secure configurations.
+dotenv is a Node.js package that loads environment variables from a `.env` file into `process.env`.  
+It helps keep sensitive information like ports, database URLs, or API keys **out of your source code**, making the project more secure and flexible.
+
+For example, our current `.env` file contains:  
+PORT=3000  
+ENVIRONMENT=local  
+
+In future modules, when Rocket Elevators integrates a database, we will also add:
+MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/rocket_db
+
+This approach keeps credentials safe and makes it easier to switch between local, development, and production environments.
 
 ---
 
@@ -90,13 +101,13 @@ Postman is a popular tool for testing REST APIs. It allows you to easily send di
 
 Rocket_Elevators_Express/
 │
-├── app.js ←   # Main application file with all route declarations
-├── .env   ←   # Stores environment variables securely. (e.g., PORT=3000)
-├── data/
-│ └── agents.js ←   # Contains static agent data used for region averaging
-│
-├── logic/
-│ └── quoteCalculator.js ←  # Contains calculation logic for residential quotes
+├── app.js ←   # Main application file with all route declarations  
+├── .env   ←   # Stores environment variables securely. (e.g., PORT=3000, ENVIRONMENT=local)  
+├── data/  
+│   └── agentsAndPricing.js ← Contains:  
+│       • Static agent data (for region queries and email list)  
+│       • Pricing configuration for elevator calculations  
+│       • Business logic to calculate residential elevator quotes  
 
 ---
 

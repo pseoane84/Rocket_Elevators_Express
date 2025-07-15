@@ -61,5 +61,5 @@ function calculateResidentialQuote(apartments, floors, tier) {
   };
 }
 
-// ✅ Export everything needed
+// Export everything needed
 module.exports = { agents, pricing, calculateResidentialQuote };

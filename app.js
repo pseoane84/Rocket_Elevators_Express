@@ -135,7 +135,7 @@ app.get('/email-list', (req, res) => {
 });
 
 /**
-* GET /region-avg?region={region}
+* GET /region-avg
 * Returns the average rating and fee for agents in the given region.
 * If no agents are found, returns an error message.
 *
@@ -175,37 +175,49 @@ app.get('/region-avg', (req, res) => {
 });
 
 /**
-* GET /calc-residential?apartments=80&floors=10&tier=standard
-* Calculates number of elevators and total cost based on tier
-* Example valid URLs:
-*   http://localhost:3000/calc-residential?apartments=80&floors=10&tier=standard
-*   http://localhost:3000/calc-residential?apartments=100&floors=20&tier=excelium
-*/
+/**
+ * GET /calc-residential
+ * Calculates number of elevators and total cost based on tier
+ *
+ * Example valid URLs:
+ *   - http://localhost:3000/calc-residential?apartments=80&floors=10&tier=standard
+ *   - http://localhost:3000/calc-residential?apartments=100&floors=20&tier=premium
+ *   - http://localhost:3000/calc-residential?apartments=150&floors=30&tier=excelium
+ *
+ * Example invalid URLs:
+ *   - http://localhost:3000/calc-residential?apartments=80&floors=10&tier=luxury  (invalid tier)
+ *   - http://localhost:3000/calc-residential?apartments=abc&floors=10&tier=standard (apartments not a number)
+ *   - http://localhost:3000/calc-residential?apartments=80&floors=10.5&tier=standard (floors not an integer)
+ *   - http://localhost:3000/calc-residential?apartments=0&floors=-5&tier=standard (values must be > 0)
+ */
 
 app.get('/calc-residential', (req, res) => {
   const { apartments, floors, tier } = req.query;
 
-  // Convert inputs to integers
-  const numApartments = parseInt(apartments);
-  const numFloors = parseInt(floors);
+  // Convert inputs
+  const numApartments = Number(apartments);
+  const numFloors = Number(floors);
 
-  // Validate inputs
-  if (!tier || !pricing[tier]) {
-    return res.status(400).json({
-      error: 'Invalid or missing tier. Must be standard, premium, or excelium.'
-    });
-  }
-
+  // 1. Validate that they are valid numbers
   if (isNaN(numApartments) || isNaN(numFloors)) {
     return res.status(400).json({ error: 'Apartments and floors must be valid numbers.' });
   }
 
+  // 2. Validate that they are integers (no decimals)
   if (!Number.isInteger(numApartments) || !Number.isInteger(numFloors)) {
     return res.status(400).json({ error: 'Apartments and floors must be integers.' });
   }
 
+  // 3. Validate positive values
   if (numApartments <= 0 || numFloors <= 0) {
     return res.status(400).json({ error: 'Apartments and floors must be greater than zero.' });
+  }
+
+  // 4. Validate tier only AFTER numbers are correct
+  if (!tier || !pricing[tier]) {
+    return res.status(400).json({
+      error: 'Invalid or missing tier. Must be standard, premium, or excelium.'
+    });
   }
 
   try {
@@ -215,6 +227,7 @@ app.get('/calc-residential', (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
 
 
  /**
@@ -235,15 +248,15 @@ app.get('/calc-residential', (req, res) => {
 app.post('/contact-us', (req, res) => {
   const { first_name, last_name, message } = req.body;
 
-  // ✅ Log the full request body to the console
+  // Log the full request body to the console
   console.log('📩 New Contact Us Submission:', req.body);
 
-  // ✅ Basic validation
+  // Basic validation
   if (!first_name || !last_name || !message) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
 
-  // ✅ Respond recognizing the sender
+  // Respond recognizing the sender
   res.json({
     success: true,
     received: req.body,
