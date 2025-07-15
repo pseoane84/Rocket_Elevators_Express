@@ -3,7 +3,7 @@
  * File: app.js
  * Description: Express app with routes and configuration
  * Author: Pablo Seoane
- * Date: 7/4/72025
+ * Date: 7/4/2025
  *******************************************************/
 
 /**
@@ -33,17 +33,24 @@
  *    - GET /calc-residential
  */
 
-
 /* ---------------------------- 1. SETUP SECTION ---------------------------- */
+
+// Load environment variables from .env file
+require('dotenv').config();
 
 const express = require('express');
 const fetch = require('node-fetch');
+const detailedAgents = require('./data/agents');
+const { calculateResidentialQuote } = require('./logic/quoteCalculator');
+
 const app = express();
 app.use(express.json());
 
-const port = 3000;
 
 /* ---------------------------- 2. START SERVER ---------------------------- */
+
+// Use port from .env file or default to 3000
+const port = process.env.PORT || 3000;
 
 app.listen(port, () => {
   console.log(`Server listening on port ${port}`);
@@ -78,9 +85,11 @@ app.get('/agent', (req, res) => {
  */
 app.post('/create', (req, res) => {
   const newAgent = req.body;
-  res.send(`Agent created: ${JSON.stringify(newAgent)}`);
+  res.json({
+    message: 'Agent created successfully',
+    agent: newAgent
+  });
 });
-
 
 /* ------------------------ 4. ROUTES: MODULE 4 ASSIGNMENTS ------------------------ */
 
@@ -95,11 +104,12 @@ app.get('/hello', (req, res) => {
 
 /**
  * GET /status
- * Returns a message with the current port 
- * http://localhost:3000/status
+ * Returns a message with the current port and environment
+ * Example response: "Server is running on port 3000 in local environment"
+ * URL: http://localhost:3000/status
  */
 app.get('/status', (req, res) => {
-  res.send(`Server is running on port ${port}`);
+  res.send(`Server is running on port ${port} in ${process.env.ENVIRONMENT} environment`);
 });
 
 /**
@@ -116,20 +126,20 @@ app.get('/error', (req, res) => {
 });
 
 /**
+/**
  * GET /email-list
  * Returns a comma-separated list of agent emails 
- * http://localhost:3000/email-list
+ * Example: "perez@rocket.elv,brutus@rocket.elv,..."
+ * URL: http://localhost:3000/email-list
  */
-app.get('/email-list', async (req, res) => {
+app.get('/email-list', (req, res) => {
   try {
-    const response = await fetch('http://99.79.77.144:3000/api/agents');
-    const agents = await response.json();
-
+    const agents = require('./data/agents');
     const emails = agents.map(agent => agent.email).join(',');
     res.send(emails);
   } catch (error) {
-    console.error('Error fetching agents:', error.message);
-    res.status(500).send('Error fetching agent data.');
+    console.error('Error loading agent emails:', error.message);
+    res.status(500).send('Error processing agent email list.');
   }
 });
 
@@ -146,10 +156,9 @@ app.get('/email-list', async (req, res) => {
  * {
  *   "first_name": "Pablo",
  *   "last_name": "Seoane",
- *   "message": "Estoy probando el POST"
+ *   "message": "Testing the POST request"
  * }
  */
-
 app.post('/contact-us', (req, res) => {
   const { first_name, last_name, message } = req.body;
 
@@ -164,37 +173,43 @@ app.post('/contact-us', (req, res) => {
 });
 
 /**
- * GET /region-avg?region=North
- * Returns the average rating and fee for agents in a region
- * http://localhost:3000/region-avg?region=North
- * Requires a region parameter passed as a query
+ * GET /region-avg?region={region}
+ * Returns the average rating and fee for agents in the given region.
+ * If no agents are found, returns an error message.
+ *
+ * Example valid URLs:
+ *  - http://localhost:3000/region-avg?region=north
+ *  - http://localhost:3000/region-avg?region=east
+ *  - http://localhost:3000/region-avg?region=south
+ * Example invalid URL:
+ *  - http://localhost:3000/region-avg?region=west
  */
-const detailedAgents = [
-  { name: 'Alice', region: 'North', rating: 4.5, fee: 200 },
-  { name: 'Bob', region: 'North', rating: 4.0, fee: 250 },
-  { name: 'Charlie', region: 'South', rating: 3.8, fee: 180 }
-];
 
 app.get('/region-avg', (req, res) => {
-  const region = req.query.region;
-
-  if (!region) {
+  const regionParam = req.query.region;
+  if (!regionParam) {
     return res.status(400).json({ error: 'Region is required as query parameter' });
   }
 
-  const filtered = detailedAgents.filter(agent => agent.region === region);
+  const regionLower = regionParam.toLowerCase();
+  const agents = require('./data/agents');
+  const filtered = agents.filter(a => a.region.toLowerCase() === regionLower);
 
   if (filtered.length === 0) {
-    return res.status(404).json({ error: 'No agents found in that region' });
+    return res.status(404).json({
+      error: `No agents found in the supplied region (${regionParam}).`
+    });
   }
 
-  const avgRating = filtered.reduce((sum, a) => sum + a.rating, 0) / filtered.length;
-  const avgFee = filtered.reduce((sum, a) => sum + a.fee, 0) / filtered.length;
+  const totalRating = filtered.reduce((sum, a) => sum + parseFloat(a.rating || 0), 0);
+  const totalFee = filtered.reduce((sum, a) => sum + parseFloat(a.fee || 0), 0);
+  const avgRating = totalRating / filtered.length;
+  const avgFee = totalFee / filtered.length;
 
   res.json({
-    region,
-    averageRating: avgRating,
-    averageFee: avgFee
+    region: regionParam,
+    averageRating: Number(avgRating.toFixed(2)),
+    averageFee: Number(avgFee.toFixed(2))
   });
 });
 
@@ -214,16 +229,7 @@ app.get('/calc-residential', (req, res) => {
     return res.status(400).json({ error: 'Both apartments and floors must be numbers' });
   }
 
-  const elevatorsPerColumn = Math.ceil(numApartments / numFloors / 6);
-  const numColumns = Math.ceil(numFloors / 20);
-  const totalElevators = elevatorsPerColumn * numColumns;
-
-  const unitPrice = 7565;
-  const totalCost = totalElevators * unitPrice;
-
-  res.json({
-    totalElevators,
-    totalCost
-  });
+  const result = calculateResidentialQuote(numApartments, numFloors);
+  res.json(result);
 });
 
