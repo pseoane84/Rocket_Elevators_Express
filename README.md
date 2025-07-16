@@ -64,7 +64,7 @@ It's used to build backend applications like web servers or tools that interact 
 
 ---
 
-## What is Express? 
+## What is Express? (https://www.youtube.com/watch?v=_7UQPve99r4)
 Express is a framework built on top of Node.js that helps us organize our code better. Think of Express like a well-organized toolkit—it gives us shortcuts and structure to build our server quickly and efficiently.
 
 With Express, we can:
@@ -76,6 +76,34 @@ With Express, we can:
 - Manage incoming data in a secure and structured way
 
 ---
+
+## What is Middleware?
+In web development, middleware refers to any function that sits between the incoming request and the outgoing response. In Express.js, middleware is used to modify, validate, or log requests before they reach the final route. When a request comes to the server, sometimes we want to do something before it reaches the final route.
+For example:
+
+- Check if the user is allowed to access
+- Log information about the request (like method and URL)
+- Process the request body so it’s easier to read
+
+This “in-between” function is called middleware, a checkpoint between the request and the response. Express uses middleware with the app.use() or by adding it as an argument in routes.
+
+
+---
+
+## Example of a Middleware
+In Express, we can use middleware for all routes like this:
+// Middleware to log the request method and URL
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+  next(); // Pass control to the next middleware or route
+});
+
+What happens here?
+- Before any route is executed, this middleware logs the HTTP method (GET, POST, etc.) and the requested URL.
+- Then next() tells Express to move on to the next step — either another middleware or the actual route handler.
+
+This helps with debugging and understanding how your server is being used.
+
 
 ## What is dotenv (for environment variables)
 dotenv is a Node.js package that loads environment variables from a `.env` file into `process.env`.  
@@ -136,6 +164,25 @@ An API is an application programming interface. It is a set of rules that allow 
 
 REST determines how the API looks like. It stands for “Representational State Transfer”. It is a set of rules that developers follow when they create their API. One of these rules states that you should be able to get a piece of data (called a resource) when you link to a specific URL.
 Each URL is called a request while the data sent back to you is called a response.
+
+---
+
+## Understanding C.R.U.D. Operations
+CRUD stands for Create, Read, Update, Delete, the four basic operations that almost any backend API will perform on data.
+
+- **Create (C)** - Adds new data to the system.
+Example: A POST /contact-us request creates a new message.
+
+- **Read (R)** - Retrieves data from the system.
+Example: A GET /email-list request reads and returns all agent emails.
+
+- **Update (U)** - Changes or modifies existing data.
+Example: A future PUT /agent could update an agent’s info.
+
+- **Delete (D)** - Removes data from the system.
+Example: A future DELETE /agent/:id could delete an agent.
+
+APIs are essentially built around these operations. In our project, we mostly use Read (GET) and Create (POST) for now, but the same principle will apply when we later add databases.
 
 ---
 

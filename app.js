@@ -35,17 +35,27 @@
 
 /* ---------------------------- 1. SETUP SECTION ---------------------------- */
 
-// Load environment variables from .env file
+// Load environment variables from the .env file (e.g., PORT, ENVIRONMENT)
 require('dotenv').config();
 
 const express = require('express');
 const fetch = require('node-fetch');
 
-// ✅ Import both the agents list and the calculation logic from a single file
+// Import both the agents list, pricing configuration, and the calculation logic
 const { agents, pricing, calculateResidentialQuote } = require('./data/agentsAndPricing');
 
 const app = express();
+
+// Built-in middleware to parse incoming JSON requests (required for POST endpoints)
 app.use(express.json());
+
+// Global logging middleware: runs on every request and logs method, URL, and timestamp
+app.use((req, res, next) => {
+  const now = new Date().toISOString();
+  console.log(`[${now}] ${req.method} ${req.url}`);
+  next(); // important to move on to the next middleware or route handler
+});
+
 
 
 /* ---------------------------- 2. START SERVER ---------------------------- */
@@ -89,6 +99,7 @@ app.listen(port, () => {
 */
 
 app.get('/hello', (req, res) => {
+  console.log(`/hello endpoint was called - running on port ${port}`);
   res.send('Hello World!');
 });
 
